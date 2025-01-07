@@ -1,4 +1,4 @@
-import { AuthContextSchema, BookCreate, initBook, UserCreate } from "../schemas/schemas";
+import { AuthContextSchema, BookCreate, initBook } from "../schemas/schemas";
 
   export const handleAddBook = async (e: any, auth: AuthContextSchema, newBook: BookCreate, setNewBook: any, setBooks: any) => {
     e.preventDefault();
@@ -40,26 +40,6 @@ import { AuthContextSchema, BookCreate, initBook, UserCreate } from "../schemas/
       console.error('Failed to fetch books:', error);
     }
   };
-
-
-export const handleRegister = async (e: any, auth: AuthContextSchema, registerForm: UserCreate) => {
-  e.preventDefault();
-  try {
-    const response = await fetch(import.meta.env.VITE_API_URL + '/api/v1/users/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
-      body: JSON.stringify(registerForm),
-    });
-    if (response.ok) {
-      console.log("login now");
-      alert('login now');
-      location.reload();
-    }
-  } catch (error) {
-    console.error('Registration failed:', error);
-  }
-};
-
 
 export const handleBorrow = async (bookId: string, auth: AuthContextSchema, setBooks: any) => {
   try {

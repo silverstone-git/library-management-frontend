@@ -11,7 +11,8 @@ const Navbar = () => {
 
   return <div className='w-full h-24 flex items-center px-24'>
 
-    <div className="rounded-full h-12 w-12 bg-red-500"></div>
+    <img src="/logo.png" alt="logo" className="h-24 rounded-full " />
+
     <div className="flex w-full gap-8 items-center justify-end">
     { authLevel > 0 ?
 

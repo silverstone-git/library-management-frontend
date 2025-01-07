@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import { AuthContextSchema } from '@/schemas/schemas';
+import { AuthContextSchema } from '../schemas/schemas';
+import { login } from '../server/users'
 
 // Create a context
 const AuthContext = createContext<AuthContextSchema>({
@@ -52,11 +53,8 @@ export const AuthProvider = ({ children }: any) => {
       //
     //
       try {
-        const response = await fetch('http://localhost:8000/api/v1/users/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(loginForm),
-        });
+        const response = await login(loginForm);
+
         if (response.ok) {
           const data = await response.json();
           Cookies.set('token', data.token, { expires: 7 });

@@ -9,7 +9,8 @@ import { BookPublic, initBook, AuthContextSchema, UserCreate } from './schemas/s
 import { useAuth } from './lib/AuthContext';
 import { Checkbox } from './components/ui/checkbox';
 import BookCard from './components/BookCard';
-import { fetchBooks, handleAddBook, handleRegister } from './server/books';
+import { fetchBooks, handleAddBook } from './server/books';
+import { handleRegister } from './server/users';
 
 const App = () => {
 
