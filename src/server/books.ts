@@ -7,7 +7,7 @@ import { AuthContextSchema, BookCreate, initBook, UserCreate } from "../schemas/
     console.log("making book", newBook);
     
     try {
-      const response = await fetch('http://localhost:8000/api/v1/books/addBook', {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/v1/books/addBook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
         body: JSON.stringify(newBook),
@@ -26,7 +26,7 @@ import { AuthContextSchema, BookCreate, initBook, UserCreate } from "../schemas/
 
   export const fetchBooks = async (auth: AuthContextSchema, setBooks: any) => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/books/getBooks', {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/v1/books/getBooks', {
         headers: {'Authorization': `Bearer ${auth.token}` },
       });
       if (response.ok) {
@@ -45,7 +45,7 @@ import { AuthContextSchema, BookCreate, initBook, UserCreate } from "../schemas/
 export const handleRegister = async (e: any, auth: AuthContextSchema, registerForm: UserCreate) => {
   e.preventDefault();
   try {
-    const response = await fetch('http://localhost:8000/api/v1/users/register', {
+    const response = await fetch(import.meta.env.VITE_API_URL + '/api/v1/users/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
       body: JSON.stringify(registerForm),
@@ -63,7 +63,7 @@ export const handleRegister = async (e: any, auth: AuthContextSchema, registerFo
 
 export const handleBorrow = async (bookId: string, auth: AuthContextSchema, setBooks: any) => {
   try {
-    const response = await fetch('http://localhost:8000/api/v1/transactions/borrow', {
+    const response = await fetch(import.meta.env.VITE_API_URL + '/api/v1/transactions/borrow', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bookId }),

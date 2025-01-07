@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
@@ -13,9 +13,9 @@ import { fetchBooks, handleAddBook, handleRegister } from './server/books';
 
 const App = () => {
 
-  const [activeTab, setActiveTab] = useState('books');
+  //const [activeTab, setActiveTab] = useState('books');
   const [books, setBooks] = useState<BookPublic[]>([]);
-  const [transactions, setTransactions] = useState([]);
+  //const [transactions, setTransactions] = useState([]);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState<UserCreate>({name: '', email: '', password: ''});
   const [newBook, setNewBook] = useState(initBook);
