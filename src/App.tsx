@@ -5,34 +5,24 @@ import { Input } from "./components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { BookOpen, Library, Users, BarChart3 } from 'lucide-react';
 import { BookSchema } from './schemas/schemas';
+import Cookies from 'js-cookie';
+import { useAuth } from './lib/AuthContext';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('books');
   const [books, setBooks] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ name: '', email: '', password: '' });
   const [newBook, setNewBook] = useState({ title: '', author: '', isbn: '', quantity: '' });
 
-  // Login handler
+  const auth = useAuth();
+
+  console.log(auth);
+
   const handleLogin = async (e: any) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginForm),
-      });
-      if (response.ok) {
-        setIsLoggedIn(true);
-        const data = await response.json();
-        setIsAdmin(data.user.role === 'admin');
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
+    auth.loginAction(loginForm)
   };
 
   // Register handler
@@ -45,7 +35,9 @@ const App = () => {
         body: JSON.stringify(registerForm),
       });
       if (response.ok) {
-        setIsLoggedIn(true);
+        console.log("login now");
+        alert('login now');
+        location.reload();
       }
     } catch (error) {
       console.error('Registration failed:', error);
@@ -68,7 +60,7 @@ const App = () => {
   // Add book handler (admin only)
   const handleAddBook = async (e: any) => {
     e.preventDefault();
-    if (!isAdmin) return;
+    if (auth.authLevel < 2) return;
     
     try {
       const response = await fetch('http://localhost:8000/api/v1/books/addBook', {
@@ -104,7 +96,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
-        {!isLoggedIn ? (
+        {auth.authLevel == 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Login Form */}
             <Card>
@@ -188,7 +180,7 @@ const App = () => {
                 <Library className="w-4 h-4" />
                 Transactions
               </TabsTrigger>
-              {isAdmin && (
+              {auth.authLevel == 2 && (
                 <>
                   <TabsTrigger value="users" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
@@ -238,7 +230,7 @@ const App = () => {
               </Card>
             </TabsContent>
 
-            {isAdmin && (
+            {auth.authLevel == 2 && (
               <>
                 <TabsContent value="users">
                   <Card>
