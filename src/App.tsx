@@ -4,6 +4,7 @@ import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { BookOpen, Library, Users, BarChart3 } from 'lucide-react';
+import { BookSchema } from './schemas/schemas';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('books');
@@ -16,10 +17,10 @@ const App = () => {
   const [newBook, setNewBook] = useState({ title: '', author: '', isbn: '', quantity: '' });
 
   // Login handler
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users/login', {
+      const response = await fetch('http://localhost:8000/api/v1/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm),
@@ -35,10 +36,10 @@ const App = () => {
   };
 
   // Register handler
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users/register', {
+      const response = await fetch('http://localhost:8000/api/v1/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerForm),
@@ -54,7 +55,7 @@ const App = () => {
   // Fetch books
   const fetchBooks = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/v1/books/getBooks');
+      const response = await fetch('http://localhost:8000/api/v1/books/getBooks');
       if (response.ok) {
         const data = await response.json();
         setBooks(data);
@@ -65,12 +66,12 @@ const App = () => {
   };
 
   // Add book handler (admin only)
-  const handleAddBook = async (e) => {
+  const handleAddBook = async (e: any) => {
     e.preventDefault();
     if (!isAdmin) return;
     
     try {
-      const response = await fetch('http://localhost:3000/api/v1/books/addBook', {
+      const response = await fetch('http://localhost:8000/api/v1/books/addBook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBook),
@@ -85,9 +86,9 @@ const App = () => {
   };
 
   // Borrow book handler
-  const handleBorrow = async (bookId) => {
+  const handleBorrow = async (bookId: string) => {
     try {
-      const response = await fetch('http://localhost:3000/api/v1/transactions/borrow', {
+      const response = await fetch('http://localhost:8000/api/v1/transactions/borrow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bookId }),
@@ -203,18 +204,18 @@ const App = () => {
 
             <TabsContent value="books">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {books.map((book) => (
+                {books.map((book: BookSchema) => (
                   <Card key={book.id}>
                     <CardHeader>
                       <CardTitle>{book.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600">Author: {book.author}</p>
-                      <p className="text-sm text-gray-600">ISBN: {book.isbn}</p>
-                      <p className="text-sm text-gray-600 mb-4">Available: {book.quantity}</p>
+                      <p className="text-sm text-gray-600">{book.title} by {book.author} ({book.publicationYear})</p>
+                      <p className="text-sm text-gray-600">ID: {book.id}</p>
+                      <p className="text-sm text-gray-600 mb-4">Available: {book.availabilityStatus}</p>
                       <Button
                         onClick={() => handleBorrow(book.id)}
-                        disabled={book.quantity === 0}
+                        disabled={!book.availabilityStatus}
                         className="w-full"
                         style={{ backgroundColor: '#9c88bf', color: 'white' }}
                       >
