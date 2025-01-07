@@ -2,96 +2,40 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { BookOpen, Library, Users, BarChart3 } from 'lucide-react';
-import { BookSchema } from './schemas/schemas';
-import Cookies from 'js-cookie';
+import { BookPublic, initBook, AuthContextSchema, UserCreate } from './schemas/schemas';
 import { useAuth } from './lib/AuthContext';
+import { Checkbox } from './components/ui/checkbox';
+import BookCard from './components/BookCard';
+import { fetchBooks, handleAddBook, handleRegister } from './server/books';
 
 const App = () => {
+
   const [activeTab, setActiveTab] = useState('books');
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState<BookPublic[]>([]);
   const [transactions, setTransactions] = useState([]);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [registerForm, setRegisterForm] = useState({ name: '', email: '', password: '' });
-  const [newBook, setNewBook] = useState({ title: '', author: '', isbn: '', quantity: '' });
+  const [registerForm, setRegisterForm] = useState<UserCreate>({name: '', email: '', password: ''});
+  const [newBook, setNewBook] = useState(initBook);
 
-  const auth = useAuth();
+  const auth: AuthContextSchema = useAuth();
 
   console.log(auth);
 
-  const handleLogin = async (e: any) => {
+  useEffect(() => {
+
+    // get the books:
+    //
+    fetchBooks(auth, setBooks);
+  }, [])
+
+  const handleLogin = async (e: any, auth: AuthContextSchema) => {
     e.preventDefault();
     auth.loginAction(loginForm)
   };
 
-  // Register handler
-  const handleRegister = async (e: any) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registerForm),
-      });
-      if (response.ok) {
-        console.log("login now");
-        alert('login now');
-        location.reload();
-      }
-    } catch (error) {
-      console.error('Registration failed:', error);
-    }
-  };
-
-  // Fetch books
-  const fetchBooks = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/books/getBooks');
-      if (response.ok) {
-        const data = await response.json();
-        setBooks(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch books:', error);
-    }
-  };
-
-  // Add book handler (admin only)
-  const handleAddBook = async (e: any) => {
-    e.preventDefault();
-    if (auth.authLevel < 2) return;
-    
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/books/addBook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBook),
-      });
-      if (response.ok) {
-        setNewBook({ title: '', author: '', isbn: '', quantity: '' });
-        fetchBooks();
-      }
-    } catch (error) {
-      console.error('Failed to add book:', error);
-    }
-  };
-
-  // Borrow book handler
-  const handleBorrow = async (bookId: string) => {
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/transactions/borrow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookId }),
-      });
-      if (response.ok) {
-        fetchBooks();
-      }
-    } catch (error) {
-      console.error('Failed to borrow book:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -104,7 +48,7 @@ const App = () => {
                 <CardTitle>Login</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={(e) => handleLogin(e, auth)} className="space-y-4">
                   <Input
                     type="email"
                     placeholder="Email"
@@ -136,7 +80,7 @@ const App = () => {
                 <CardTitle>Register</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleRegister} className="space-y-4">
+                <form onSubmit={(e) => handleRegister(e, auth, registerForm)} className="space-y-4">
                   <Input
                     type="text"
                     placeholder="Name"
@@ -196,26 +140,11 @@ const App = () => {
 
             <TabsContent value="books">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {books.map((book: BookSchema) => (
-                  <Card key={book.id}>
-                    <CardHeader>
-                      <CardTitle>{book.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600">{book.title} by {book.author} ({book.publicationYear})</p>
-                      <p className="text-sm text-gray-600">ID: {book.id}</p>
-                      <p className="text-sm text-gray-600 mb-4">Available: {book.availabilityStatus}</p>
-                      <Button
-                        onClick={() => handleBorrow(book.id)}
-                        disabled={!book.availabilityStatus}
-                        className="w-full"
-                        style={{ backgroundColor: '#9c88bf', color: 'white' }}
-                      >
-                        Borrow
-                      </Button>
-                    </CardContent>
-                  </Card>
+
+                {books.map((book: BookPublic) => (
+                    <BookCard key={book._id} book={book} auth={auth} setBooks={setBooks} />
                 ))}
+
               </div>
             </TabsContent>
 
@@ -249,7 +178,7 @@ const App = () => {
                       <CardTitle>Admin Dashboard</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <form onSubmit={handleAddBook} className="space-y-4">
+                      <form onSubmit={(e) => handleAddBook(e, auth, newBook, setNewBook, setBooks)} className="space-y-4">
                         <Input
                           placeholder="Book Title"
                           value={newBook.title}
@@ -261,16 +190,31 @@ const App = () => {
                           onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
                         />
                         <Input
+                          placeholder="Publication Year"
+                          type='number'
+                          value={newBook.publicationYear}
+                          onChange={(e) => setNewBook({ ...newBook, publicationYear: Number(e.target.value) })}
+                        />
+                        <Input
                           placeholder="ISBN"
                           value={newBook.isbn}
                           onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
                         />
-                        <Input
-                          type="number"
-                          placeholder="Quantity"
-                          value={newBook.quantity}
-                          onChange={(e) => setNewBook({ ...newBook, quantity: e.target.value })}
-                        />
+                        <div className='flex items-center gap-2'>
+                          <Checkbox
+                            id='availabilityStatus'
+                            value={newBook.availabilityStatus ? 'on' : 'off'}
+                            onCheckedChange={(e) => {
+                                setNewBook({ ...newBook,
+                                availabilityStatus: e.valueOf() == true })
+                                }
+                              }
+                          />
+                          <Label htmlFor='availabilityStatus'>
+                            Book is available
+                          </Label>
+
+                        </div>
                         <Button 
                           type="submit"
                           style={{ backgroundColor: '#9c88bf', color: 'white' }}

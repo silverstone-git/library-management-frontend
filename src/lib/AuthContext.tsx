@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
+import { AuthContextSchema } from '@/schemas/schemas';
 
 // Create a context
-const AuthContext = createContext<{authLevel: number; token: string; user: {name: string; email: string; role: string}; loginAction: any; logOut: any}>({
+const AuthContext = createContext<AuthContextSchema>({
   authLevel: 0, 
   token: "", 
   user: {name: "", email: "", role: ""},
