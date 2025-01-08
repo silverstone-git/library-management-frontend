@@ -7,7 +7,7 @@ export interface UserCreate {
 export interface AuthContextSchema {
   authLevel: number; 
   token: string; 
-  user: {name: string; email: string; role: string}; 
+  user: {_id: string, name: string; email: string; role: string}; 
   loginAction: any; 
   logOut: any
 }

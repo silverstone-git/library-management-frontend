@@ -10,26 +10,27 @@ import { useAuth } from './lib/AuthContext';
 import { Checkbox } from './components/ui/checkbox';
 import BookCard from './components/BookCard';
 import { fetchBooks, handleAddBook } from './server/books';
+import { fetchTransactions } from './server/transactions';
 import { handleRegister } from './server/users';
 
 const App = () => {
 
   //const [activeTab, setActiveTab] = useState('books');
   const [books, setBooks] = useState<BookPublic[]>([]);
-  //const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState<UserCreate>({name: '', email: '', password: ''});
   const [newBook, setNewBook] = useState(initBook);
 
   const auth: AuthContextSchema = useAuth();
-
-  console.log(auth);
+  console.log("user: ", auth.user);
 
   useEffect(() => {
 
     // get the books:
     //
     fetchBooks(auth, setBooks);
+    fetchTransactions(auth, setTransactions)
   }, [])
 
   const handleLogin = async (e: any, auth: AuthContextSchema) => {
@@ -143,7 +144,7 @@ const App = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 {books.map((book: BookPublic) => (
-                    <BookCard key={book._id} book={book} auth={auth} setBooks={setBooks} />
+                    <BookCard key={book._id} book={book} auth={auth} books={books} setBooks={setBooks} />
                 ))}
 
               </div>
@@ -155,7 +156,11 @@ const App = () => {
                   <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* Transactions list would go here */}
+                  {transactions.map((tr: any) => {
+                        return <div key={tr._id}>
+                          {tr.bookId.title} borrowed till {tr.returnDate}
+                          </div>
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>

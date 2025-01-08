@@ -8,7 +8,7 @@ import { login } from '../server/users'
 const AuthContext = createContext<AuthContextSchema>({
   authLevel: 0, 
   token: "", 
-  user: {name: "", email: "", role: ""},
+  user: {_id: "", name: "", email: "", role: ""},
   loginAction: null,
   logOut: null
 });
@@ -17,28 +17,50 @@ const AuthContext = createContext<AuthContextSchema>({
 export const AuthProvider = ({ children }: any) => {
     const [authLevel, setAuthLevel] = useState<number>(0);
     const [token, setToken] = useState(Cookies.get('token') || "")
-    const [user, setUser] = useState<{name: string; email: string; role: string}>(
+    const [user, setUser] = useState<{_id: string; name: string; email: string; role: string}>(
     {
+      _id: Cookies.get('_id') || "",
       name: Cookies.get('name') || "", 
       email: Cookies.get('email') || "", 
       role: ""})
+
+    const logOut = () => {
+      setUser({_id: "",name: "", email: "", role: ""});
+      setToken("");
+      setAuthLevel(0);
+      Cookies.remove('token');
+      Cookies.remove('name');
+      Cookies.remove('email');
+      Cookies.remove('role');
+      Cookies.remove('_id');
+      //location.reload();
+    };
+
 
     const checkLoggedIn = (user: any, setAuthLevel: any, setUser: any) => {
 
         const token = Cookies.get('token');
         if(token) {
-          const decoded: any = jwtDecode(token ?? '');
-          if(decoded['role'] == 'admin') {
-            console.log("admin");
-            setAuthLevel(2);
-            setUser({...user, role: "admin"})
-          } else {
-            console.log(decoded);
-            setAuthLevel(1);
-            setUser({...user, role: "user"})
+          
+          try {
+            const decoded: any = jwtDecode(token ?? '');
+            setUser({...user, _id: decoded['id']}) 
+
+            if(decoded['role'] == 'admin') {
+              setAuthLevel(2);
+              setUser({...user, role: "admin"})
+            } else {
+              setAuthLevel(1);
+              setUser({...user, role: "user"})
+            }
+          } catch(e) {
+
+            console.log("Cookie reading and state setting failed: ", e);
+            logOut();
           }
+
         } else {
-          setAuthLevel(0);
+          logOut();
         }
     }
 
@@ -60,9 +82,11 @@ export const AuthProvider = ({ children }: any) => {
           Cookies.set('token', data.token, { expires: 7 });
           Cookies.set('name', data.name, { expires: 7 });
           Cookies.set('email', data.email, { expires: 7 });
-          setUser({name: data.name as string, email: data.email as string, role: ""})
+          Cookies.set('_id', data._id, { expires: 7 });
+          setUser({_id: data._id as string, name: data.name as string, email: data.email as string, role: ""})
           setToken(token)
           checkLoggedIn(user, setAuthLevel, setUser);
+          location.reload();
           
         }
       } catch (error) {
@@ -70,16 +94,6 @@ export const AuthProvider = ({ children }: any) => {
       }
 
     }
-
-    const logOut = () => {
-      setUser({name: "", email: "", role: ""});
-      setToken("");
-      Cookies.remove('token');
-      Cookies.remove('name');
-      Cookies.remove('email');
-      Cookies.remove('role');
-      location.reload();
-    };
 
     return (
         <AuthContext.Provider value={{ 
