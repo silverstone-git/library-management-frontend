@@ -1,50 +1,40 @@
-# React + TypeScript + Vite
+# dtulib
+This is the frontend code for a Library Management System, supposed to communicate with [backend server](https://github.com/silverstone-git/library-management-backend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Check out the [Deployed Link](https://dtulib.vercel.app)
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+- Adding a book (admin)
+- Deleting a book (admin)
+- Password Authentication
+- Borrowing a book (user)
+- Seeing all relevant transactions of user (user)
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Tech Stack
+- Vite for bundling
+- React.js for component code
+- Typescript for other scripts and utilities
+- TailwindCSS for styling
 
-- Configure the top-level `parserOptions` property like this:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Environment Variables
+- VITE_DEFAULT_BORROW_LIMIT
+- VITE_API_URL
+
+## Usage
+- Clone the repository
+- Install all the packages
+
+```bash
+npm run install
+
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+- To run the dev server,
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+```bash 
+npm run dev
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
 ```
